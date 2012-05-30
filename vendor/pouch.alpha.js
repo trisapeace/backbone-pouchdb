@@ -1565,6 +1565,9 @@ var IdbPouch = function(opts, callback) {
 
     var writeDoc = function(docInfo, callback) {
 
+    console.log("WRITING DOCS");
+    console.log(docInfo);
+
       for (var key in docInfo.data._attachments) {
         if (!docInfo.data._attachments[key].stub) {
           docInfo.data._attachments[key].stub = true;
