@@ -20,6 +20,7 @@ $(function(){
         type: 'backbone.todo',
         title: "empty todo...",
         order: Todos.nextOrder(),
+        modified: false,
         done: false
       };
     },
@@ -136,6 +137,7 @@ $(function(){
     // Switch this view into `"editing"` mode, displaying the input field.
     edit: function() {
       this.$el.addClass("editing");
+      this.model.set("modified", true);
       this.input.focus();
     },
 
@@ -449,10 +451,13 @@ $(function(){
       Todos.pouch(function(err, db) {
         db.replicate.to(url, { continuous: true }, function(err, resp) {
           pushResps[url] = resp;
+          console.log(url);
+          console.log(resp);
         });
         db.replicate.from(url, { continuous: true }, function(err, resp) {
           pullResps[url] = resp;
-
+          console.log(url);
+          console.log(resp);
         });
         // get todo changes 
         var change = db.changes({

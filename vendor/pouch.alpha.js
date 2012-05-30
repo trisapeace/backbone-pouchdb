@@ -547,13 +547,14 @@ Pouch.Errors = {
         var t1 = branch.pos < path.pos ? branch : path;
         var t2 = branch.pos < path.pos ? path : branch;
         var diff = t2.pos - t1.pos;
-        var parent, tmp = t1.ids;
-
+        var parent;
+        var tmp = t1.ids;
+        
         while(diff--) {
           parent = tmp[1];
           tmp = tmp[1][0];
         }
-
+        
         if (tmp[0] !== t2.ids[0]) {
           restree.push(branch);
         } else {
@@ -634,7 +635,12 @@ Pouch.Errors = {
           pending++;
           var diff = {};
           diff[change.id] = change.changes.map(function(x) { return x.rev; });
+          
+          console.log("--CHANGE--");
+          console.log(change);
+                    
           target.revsDiff(diff, function(err, diffs) {
+            
             for (var id in diffs) {
               diffs[id].missing.map(function(rev) {
                 src.get(id, {revs: true, rev: rev}, function(err, doc) {
@@ -703,6 +709,7 @@ var call = function(fun) {
 // Preprocess documents, parse their revisions, assign an id and a
 // revision for new writes that are missing them, etc
 var parseDoc = function(doc, newEdits) {
+  
   var error = null;
   if (newEdits) {
     if (!doc._id) {
@@ -710,6 +717,7 @@ var parseDoc = function(doc, newEdits) {
     }
     var newRevId = Math.uuid(32, 16);
     var nRevNum;
+
     if (doc._rev) {
       var revInfo = /^(\d+)-(.+)$/.exec(doc._rev);
       if (!revInfo) {
@@ -1043,6 +1051,10 @@ var HttpPouch = function(opts, callback) {
     if (opts.revs_info) {
       params.push('revs_info=true');
     }
+    
+    console.log("OPTIONS");
+    console.log(opts.rev);
+    
     if (opts.rev) {
       params.push('rev=' + opts.rev);
     }
@@ -1051,6 +1063,9 @@ var HttpPouch = function(opts, callback) {
     }
     params = params.join('&');
     params = params === '' ? '' : '?' + params;
+
+    console.log("--");
+    console.log(genUrl(host, id + params));
 
     var options = {
       auth: host.auth,
@@ -1665,6 +1680,7 @@ var IdbPouch = function(opts, callback) {
 
     if (/\//.test(id) && !/^_local/.test(id) && !/^_design/.test(id)) {
       var docId = id.split('/')[0];
+      
       var attachId = id.split('/')[1];
       txn.objectStore(DOC_STORE).get(docId).onsuccess = function(e) {
         var metadata = e.target.result;
@@ -1688,6 +1704,7 @@ var IdbPouch = function(opts, callback) {
         var doc = e.target.result;
         delete doc._junk;
         doc._id = metadata.id;
+        console.log(doc);
         doc._rev = metadata.rev;
         if (opts.revs) {
           var path = arrayFirst(rootToLeaf(metadata.rev_tree), function(arr) {

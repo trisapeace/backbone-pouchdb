@@ -1,0 +1,15 @@
+{
+  "name": "To Do Sync",
+  "version": "1.4.4",
+  "description": "Collaborative Data Entry, like Word/LaTeX but more structured, online, offline, anywhere. http://tools.fieldlinguist.com",
+  "app": {
+    "launch": {
+      "local_path": "examples/todos-sync/index.html"
+    }
+  },
+  "offline_enabled": true,
+  "permissions": [
+    "unlimitedStorage",
+    "<all_urls>"
+  ]
+}

@@ -31,6 +31,9 @@ Backbone.sync = (function() {
   var sync = function(method, model, options) {
     var pouch = model.pouch || (model.collection && model.collection.pouch);
 
+    console.log("--HERE--");
+    console.log(model);
+
     if (!pouch) {
       console.error('missing pouch: ' + method);
       console.log(model);
