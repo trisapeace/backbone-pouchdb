@@ -5285,6 +5285,7 @@
         };
 
 
+        // Delete the document given by doc from the database given by host.
         api.remove = function(doc, opts, callback) {
             // If no options were given, set the callback to be the second parameter
             if( opts instanceof Function) {
@@ -5292,6 +5293,7 @@
                 opts = {};
             }
             
+            // Delete the document
             ajax({
                 auth : host.auth,
                 type : 'DELETE',
