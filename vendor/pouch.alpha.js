@@ -4084,12 +4084,30 @@
         Pouch.adapters[opts.adapter].destroy(opts.name, callback);
     };
 
+
+
+
+
+
+    // Pouch's list of adapters
     Pouch.adapters = {};
 
+
+
+
+
+    // Sets the id-th adapter in Pouch's list of adapters to the given obj.
     Pouch.adapter = function(id, obj) {
         Pouch.adapters[id] = obj;
     }
-    // Enumerate errors, add the status code so we can reflect the HTTP api
+
+
+
+
+
+
+
+    // Enumerate errors, add the status code so we can reflect the HTTP API
     // in future
     Pouch.Errors = {
         MISSING_BULK_DOCS : {
@@ -4113,6 +4131,14 @@
             reason : '_id field must contain a string'
         }
     };
+    
+    
+    
+    
+    
+    
+    
+    
     (function() {
 
         Pouch.collate = function(a, b) {
