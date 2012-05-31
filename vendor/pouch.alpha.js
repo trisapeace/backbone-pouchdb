@@ -5320,7 +5320,7 @@
 
 
         // Add the document given by doc (in JSON string format) to the database
-        // given by host. 
+        // given by host. This assumes that doc has a _id field.
         api.put = function(doc, opts, callback) {
             // If no options were given, set the callback to be the second parameter
             if( opts instanceof Function) {
@@ -5354,6 +5354,9 @@
         };
 
 
+        // Add the document given by doc (in JSON string format) to the database
+        // given by host. This assumes that doc is a new document (i.e. does not
+        // have a _id or a _rev field.
         api.post = function(doc, opts, callback) {
             // If no options were given, set the callback to be the second parameter
             if( opts instanceof Function) {
@@ -5361,6 +5364,7 @@
                 opts = {};
             }
             
+            // Add the document
             ajax({
                 auth : host.auth,
                 type : 'POST',
