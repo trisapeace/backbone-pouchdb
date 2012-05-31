@@ -5262,6 +5262,9 @@
         };
 
 
+        // Get the view given by fun of the database given by host.
+        // fun is formatted in two parts separated by a '/'; the first
+        // part is the design and the second is the view.
         api.query = function(fun, opts, callback) {
             // If no options were given, set the callback to be the second parameter
             if( opts instanceof Function) {
@@ -5269,10 +5272,18 @@
                 opts = {};
             }
             
+            // List of parameters to add to the PUT request
             var params = [];
+            
+            // If opts.reduce exists and is defined, then add it to the list
+            // of parameters.
+            // If reduce=false then the results are that of only the map function
+            // not the final result of map and reduce.
             if( typeof opts.reduce !== 'undefined') {
                 params.push('reduce=' + opts.reduce);
             }
+            
+            // Format the list of parameters into a valid URI query string
             params = params.join('&');
             params = params === '' ? '' : '?' + params;
 
