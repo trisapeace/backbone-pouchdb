@@ -3988,6 +3988,13 @@
 
     // END Crypto.md5.js
 
+
+
+
+
+
+
+    // Gloablly available Pouch
     window.Pouch = function(name, opts, callback) {
 
         if(!(this instanceof arguments.callee)) {
@@ -4012,23 +4019,46 @@
             this[j] = adapter[j];
         }
     }
-
+    
+    
+    
+    
+    
+    
+    // Parse the given name into an object containing its name and its
+    // adapter.
+    // Example 1 (http special case):
+    //     "http://helloWorld"
+    //     returns { name: "http://helloWorld", adapter: "http"}
+    // Example 2 (no adapter given in the name):
+    //     "helloWorld"
+    //     returns {name: "helloWorld", adapter: "firstValidAdaptorFromPouch"}
+    // Example 3 (non-heep adapter given):
+    //     "file://helloWorld"
+    //     returns {name: "helloWorld", adapter: "file"}
     Pouch.parseAdapter = function(name) {
 
+        // Determine whether the given name is a URI and keep track of its 
+        // adaptor (i.e. scheme) and everything after the //
+        // [Matches zero or more lowercase letters or hyphens followed by :// 
+        // followed by zero or more of any characters.]
         var match = name.match(/([a-z\-]*):\/\/(.*)/);
 
+        // If the given name is a valid URI
         if(match) {
-            // the http adapter expects the fully qualified name
+            // If the adapter is "http" then the name is the full URI. Otherwise,
+            // the name is just the parts after the //
             name = (match[1] === 'http') ? 'http://' + match[2] : match[2];
+            
+            // Return an object containing the name and the adaptor
             return {
                 name : name,
                 adapter : match[1]
             };
         }
 
-        // the name didnt specify which adapter to use, so we just pick the first
-        // valid one, we will probably add some bias to this (ie http should be last
-        // fallback)
+        // If the given name is not a valid URI, return an object containing the
+        // name and the first valid adaptor from Pouch's list of adaptors.
         for(var i in Pouch.adapters) {
             if(Pouch.adapters[i].valid()) {
                 return {
@@ -4037,8 +4067,17 @@
                 };
             }
         }
+        
+        // Throw an exception if there are no valid adaptors in Pouch's list
+        // of adaptors
         throw 'No Valid Adapter.';
     }
+
+
+
+
+
+
 
     Pouch.destroy = function(name, callback) {
         var opts = Pouch.parseAdapter(name);
