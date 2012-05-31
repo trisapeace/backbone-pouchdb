@@ -5749,7 +5749,7 @@
         var idb;
 
 
-        // The "onupgradeneeded" event handler for the database creation.
+        // The "onupgradeneeded" event handler for the database creation request:
         // Creates all the needed object stores.
         req.onupgradeneeded = function(e) {
             // Get the database from the event
@@ -5778,28 +5778,44 @@
         };
 
 
+        // The "onsuccess" event handler for the database creation request:
+        // Stores the database for use in the rest of the IdbPouch class.
+        // Tells the database to close itself if ever its version changes.
+        // Deal with Chrome weirdness.
         req.onsuccess = function(e) {
-
+            // Get the database from the event
             idb = e.target.result;
 
+            // The "onversionchange" event handler for the database:
+            // If the version changed, closes the database connection
             idb.onversionchange = function() {
                 idb.close();
             };
 
             // polyfill the new onupgradeneeded api for chrome
             if(idb.setVersion && Number(idb.version) !== POUCH_VERSION) {
+                // Make a version change request.
                 var versionReq = idb.setVersion(POUCH_VERSION);
+                
+                // The "onsuccess" event handler for the version change request:
+                // Calls the database creation request's "onupgradeneeded"
+                // handler and its "onsuccess" handler again.
                 versionReq.onsuccess = function() {
                     req.onupgradeneeded(e);
                     req.onsuccess(e);
                 };
+                
+                // IdbPouch creation not done yet
                 return;
             }
 
+            // IdbPouch creation complete
             call(callback, null, api);
         };
 
 
+        // The "onerror" event handler for the database creation request:
+        // 
         req.onerror = function(e) {
             call(callback, {
                 error : 'open',
