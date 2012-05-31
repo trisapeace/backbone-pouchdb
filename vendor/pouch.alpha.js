@@ -5113,41 +5113,57 @@
     
     
 
+    // Implements the PouchDB API for dealing with CouchDB instances over HTTP.
     var HttpPouch = function(opts, callback) {
-
+        // Parse the URI given by opts.name into a easy-to-use object.
         var host = getHost(opts.name);
+        
+        
+        // Generate the database URL based on the host.
         var db_url = genUrl(host, '');
+        
+        
+        // The functions that will be publically availble for HttpPouches.
         var api = {};
 
+
+        // Create a new CouchDB database based on the given opts.
         ajax({
             auth : host.auth,
             type : 'PUT',
             url : db_url
         }, function(err, ret) {
-            // the user may not have permission to PUT to a db url
+            // If we get an error and the error's status is "Unauthorized"
             if(err && err.status === 401) {
-                // test if the db already exists
+                // Test if the database already exists
                 ajax({
                     auth : host.auth,
                     type : 'HEAD',
                     url : db_url
                 }, function(err, ret) {
+                    // If there's still an error
                     if(err) {
-                        // still can't access db
+                        // Give the error to the callback to deal with
                         call(callback, err);
                     } else {
-                        // continue
+                        // Continue as if there had been no errors
                         call(callback, null, api);
                     }
                 });
+            // If there were no errors or the only error is "Precondition Failed"
+            // (note: "Precondition Failed" occurs when we try to create a database
+            // that already exists).
             } else if(!err || err.status === 412) {
                 call(callback, null, api);
             }
         });
 
+
+        // The HttpPouch's ID is its URL.
         api.id = function() {
             return genUrl(host, '');
         };
+
 
         api.info = function(callback) {
             ajax({
@@ -5156,6 +5172,7 @@
                 url : genUrl(host, ''),
             }, callback);
         };
+
 
         api.get = function(id, opts, callback) {
             if( opts instanceof Function) {
@@ -5508,6 +5525,7 @@
 
 
 
+    // Implements the PouchDB API for dealing with PouchDB instances in IndexedDB.
     var IdbPouch = function(opts, callback) {
 
         // IndexedDB requires a versioned database structure, this is going to make
