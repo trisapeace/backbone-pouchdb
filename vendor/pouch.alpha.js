@@ -6641,12 +6641,15 @@
 
     // Delete the IdbPouch specified by the given name.
     IdbPouch.destroy = function(name, callback) {
+        // Delete the database
         var req = indexedDB.deleteDatabase(name);
 
+        // If successful deletion
         req.onsuccess = function() {
             call(callback, null);
         };
 
+        // If unsuccessful deletion
         req.onerror = function(e) {
             call(callback, {
                 error : 'delete',
