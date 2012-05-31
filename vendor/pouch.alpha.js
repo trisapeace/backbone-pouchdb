@@ -5815,7 +5815,7 @@
 
 
         // The "onerror" event handler for the database creation request:
-        // 
+        // Inform the caller that the IdbPouch creation failed.
         req.onerror = function(e) {
             call(callback, {
                 error : 'open',
