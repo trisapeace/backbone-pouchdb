@@ -5217,6 +5217,7 @@
             });
         };
 
+
         api.query = function(fun, opts, callback) {
             if( opts instanceof Function) {
                 callback = opts;
@@ -5237,6 +5238,7 @@
             }, callback);
         };
 
+
         api.remove = function(doc, opts, callback) {
             if( opts instanceof Function) {
                 callback = opts;
@@ -5249,6 +5251,7 @@
             }, callback);
         };
 
+
         api.putAttachment = function(id, rev, doc, type, callback) {
             ajax({
                 auth : host.auth,
@@ -5260,6 +5263,7 @@
                 data : doc
             }, callback);
         };
+
 
         api.put = function(doc, opts, callback) {
             if( opts instanceof Function) {
@@ -5285,6 +5289,7 @@
             }, callback);
         };
 
+
         api.post = function(doc, opts, callback) {
             if( opts instanceof Function) {
                 callback = opts;
@@ -5297,6 +5302,7 @@
                 data : doc
             }, callback);
         };
+
 
         api.bulkDocs = function(req, opts, callback) {
             if( opts instanceof Function) {
@@ -5313,6 +5319,7 @@
                 data : req
             }, callback);
         };
+
 
         api.allDocs = function(opts, callback) {
             if( opts instanceof Function) {
@@ -5344,6 +5351,7 @@
                 url : genUrl(host, '_all_docs' + params)
             }, callback);
         };
+
 
         api.changes = function(opts, callback) {
             if( opts instanceof Function) {
@@ -5410,6 +5418,7 @@
             };
         };
 
+
         api.revsDiff = function(req, opts, callback) {
             if( opts instanceof Function) {
                 callback = opts;
@@ -5425,8 +5434,11 @@
             });
         };
 
+
         api.replicate = {};
 
+
+        // Replicate from the database given by url to this HttpPouch.
         api.replicate.from = function(url, opts, callback) {
             if( opts instanceof Function) {
                 callback = opts;
@@ -5435,6 +5447,8 @@
             return Pouch.replicate(url, api, opts, callback);
         };
 
+
+        // Replicate to the database given by dbName from this HttpPouch.
         api.replicate.to = function(dbName, opts, callback) {
             if( opts instanceof Function) {
                 callback = opts;
@@ -5442,6 +5456,7 @@
             }
             return Pouch.replicate(api, dbName, opts, callback);
         };
+
 
         return api;
     };
