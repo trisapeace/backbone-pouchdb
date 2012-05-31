@@ -4034,8 +4034,8 @@
     //     "helloWorld"
     //     returns {name: "helloWorld", adapter: "firstValidAdaptorFromPouch"}
     // Example 3 (non-heep adapter given):
-    //     "file://helloWorld"
-    //     returns {name: "helloWorld", adapter: "file"}
+    //     "idb://helloWorld"
+    //     returns {name: "helloWorld", adapter: "idb"}
     Pouch.parseAdapter = function(name) {
 
         // Determine whether the given name is a URI and keep track of its 
@@ -5482,20 +5482,31 @@
     // lot of the names still differ. This section tries to normalize the
     // different objects & methods.
     window.indexedDB = window.indexedDB || window.mozIndexedDB || window.webkitIndexedDB;
-
     window.IDBCursor = window.IDBCursor || window.webkitIDBCursor;
-
     window.IDBKeyRange = window.IDBKeyRange || window.webkitIDBKeyRange;
-
     window.IDBTransaction = window.IDBTransaction || window.webkitIDBTransaction;
-
     window.IDBDatabaseException = window.IDBDatabaseException || window.webkitIDBDatabaseException;
+
+
+
+
+
+
+
 
     function sum(values) {
         return values.reduce(function(a, b) {
             return a + b;
         }, 0);
     }
+
+
+
+
+
+
+
+
 
     var IdbPouch = function(opts, callback) {
 
@@ -6331,11 +6342,24 @@
         return api;
 
     };
-
+    
+    
+    
+    
+    
+    
+    // IdbPouch is a valid adapter.
     IdbPouch.valid = function() {
         return true;
     };
 
+
+
+
+
+
+
+    // Delete the IdbPouch specified by the given name.
     IdbPouch.destroy = function(name, callback) {
         var req = indexedDB.deleteDatabase(name);
 
@@ -6351,5 +6375,15 @@
         };
     };
 
+    // Set IdbPouch to be the adapter used with the idb scheme.
     Pouch.adapter('idb', IdbPouch);
+    
+    
+    
+    
+    
+    
+    
+    
+    
 })(this);
