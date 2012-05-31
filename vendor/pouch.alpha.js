@@ -5175,10 +5175,12 @@
 
 
         api.get = function(id, opts, callback) {
+            // If no options were given, set the callback to be the second parameter
             if( opts instanceof Function) {
                 callback = opts;
                 opts = {};
             }
+            
             var params = [];
             if(opts.revs) {
                 params.push('revs=true');
@@ -5219,10 +5221,12 @@
 
 
         api.query = function(fun, opts, callback) {
+            // If no options were given, set the callback to be the second parameter
             if( opts instanceof Function) {
                 callback = opts;
                 opts = {};
             }
+            
             var params = [];
             if( typeof opts.reduce !== 'undefined') {
                 params.push('reduce=' + opts.reduce);
@@ -5240,10 +5244,12 @@
 
 
         api.remove = function(doc, opts, callback) {
+            // If no options were given, set the callback to be the second parameter
             if( opts instanceof Function) {
                 callback = opts;
                 opts = {};
             }
+            
             ajax({
                 auth : host.auth,
                 type : 'DELETE',
@@ -5266,6 +5272,7 @@
 
 
         api.put = function(doc, opts, callback) {
+            // If no options were given, set the callback to be the second parameter
             if( opts instanceof Function) {
                 callback = opts;
                 opts = {};
@@ -5291,10 +5298,12 @@
 
 
         api.post = function(doc, opts, callback) {
+            // If no options were given, set the callback to be the second parameter
             if( opts instanceof Function) {
                 callback = opts;
                 opts = {};
             }
+            
             ajax({
                 auth : host.auth,
                 type : 'POST',
@@ -5305,10 +5314,12 @@
 
 
         api.bulkDocs = function(req, opts, callback) {
+            // If no options were given, set the callback to be the second parameter
             if( opts instanceof Function) {
                 callback = opts;
                 opts = {};
             }
+            
             if( typeof opts.new_edits !== 'undefined') {
                 req.new_edits = opts.new_edits;
             }
@@ -5322,10 +5333,12 @@
 
 
         api.allDocs = function(opts, callback) {
+            // If no options were given, set the callback to be the second parameter
             if( opts instanceof Function) {
                 callback = opts;
                 opts = {};
             }
+            
             var params = [];
             if(opts.conflicts) {
                 params.push('conflicts=true');
@@ -5354,11 +5367,13 @@
 
 
         api.changes = function(opts, callback) {
+            // If no options were given, set the callback to be the second parameter
             if( opts instanceof Function) {
                 opts = {
                     complete : opts
                 };
             }
+            
             if(callback) {
                 opts.complete = callback;
             }
@@ -5420,10 +5435,12 @@
 
 
         api.revsDiff = function(req, opts, callback) {
+            // If no options were given, set the callback to be the second parameter
             if( opts instanceof Function) {
                 callback = opts;
                 opts = {};
             }
+            
             ajax({
                 auth : host.auth,
                 type : 'POST',
@@ -5440,20 +5457,24 @@
 
         // Replicate from the database given by url to this HttpPouch.
         api.replicate.from = function(url, opts, callback) {
+            // If no options were given, set the callback to be the second parameter
             if( opts instanceof Function) {
                 callback = opts;
                 opts = {};
             }
+            
             return Pouch.replicate(url, api, opts, callback);
         };
 
 
         // Replicate to the database given by dbName from this HttpPouch.
         api.replicate.to = function(dbName, opts, callback) {
+            // If no options were given, set the callback to be the second parameter
             if( opts instanceof Function) {
                 callback = opts;
                 opts = {};
             }
+            
             return Pouch.replicate(api, dbName, opts, callback);
         };
 
