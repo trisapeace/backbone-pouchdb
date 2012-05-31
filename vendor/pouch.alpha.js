@@ -4080,6 +4080,7 @@
 
 
     Pouch.destroy = function(name, callback) {
+        // Call the destroy method on the correct adapter based on the given name
         var opts = Pouch.parseAdapter(name);
         Pouch.adapters[opts.adapter].destroy(opts.name, callback);
     };
@@ -5101,6 +5102,16 @@
         }
         return $.ajax(options);
     };
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
 
     var HttpPouch = function(opts, callback) {
 
@@ -5418,6 +5429,13 @@
         return api;
     };
 
+
+
+
+
+
+
+    // Delete the HttpPouch specified by the given name.
     HttpPouch.destroy = function(name, callback) {
         var host = getHost(name);
         ajax({
@@ -5427,11 +5445,39 @@
         }, callback);
     };
 
+
+
+
+
+
+
+
+    // HttpPouch is a valid adapter.
     HttpPouch.valid = function() {
         return true;
     }
 
+
+
+
+
+
+
+
+
+
+    // Set HttpPouch to be the adapter used with the http scheme.
     Pouch.adapter('http', HttpPouch);
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
     // While most of the IDB behaviors match between implementations a
     // lot of the names still differ. This section tries to normalize the
     // different objects & methods.
