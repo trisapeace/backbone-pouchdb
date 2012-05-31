@@ -6415,23 +6415,33 @@
             api.changes.listeners[id] = opts;
         };
 
+
         api.replicate = {};
 
+
+        // Replicate from the database given by url to this IdbPouch.
         api.replicate.from = function(url, opts, callback) {
+            // If no options were given, set the callback to be the second parameter
             if( opts instanceof Function) {
                 callback = opts;
                 opts = {};
             }
+            
             return Pouch.replicate(url, api, opts, callback);
         };
 
+
+        // Replicate to the database given by dbName from this IdbPouch.
         api.replicate.to = function(dbName, opts, callback) {
+            // If no options were given, set the callback to be the second parameter
             if( opts instanceof Function) {
                 callback = opts;
                 opts = {};
             }
+            
             return Pouch.replicate(api, dbName, opts, callback);
         };
+
 
         api.query = function(fun, opts, callback) {
             if( opts instanceof Function) {
@@ -6460,6 +6470,8 @@
                 viewQuery(fun, idb, opts);
             }
         }
+        
+        
         // Wrapper for functions that call the bulkdocs api with a single doc,
         // if the first result is an error, return an error
         var yankError = function(callback) {
@@ -6471,6 +6483,7 @@
                 }
             };
         };
+
 
         var viewQuery = function(fun, idb, options) {
 
@@ -6545,6 +6558,7 @@
                 }
             }
         }
+
 
         return api;
 
