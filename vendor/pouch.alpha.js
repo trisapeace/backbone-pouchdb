@@ -6191,24 +6191,37 @@
         };
 
 
+        // Add the document given by doc (as a Javascript object) to the database
+        // given by idb. This works the same whether doc has an _id field or not.
         api.put = api.post = function(doc, opts, callback) {
+            // If no options were given, set the callback to be the second parameter
             if( opts instanceof Function) {
                 callback = opts;
                 opts = {};
             }
+            
+            // Do a bulk update where the list of documents only contains doc
             return api.bulkDocs({
                 docs : [doc]
             }, opts, yankError(callback));
         };
 
 
+        // Remove the given doc (as a Javascript object) from the database
+        // given by idb.
         api.remove = function(doc, opts, callback) {
+            // If no options were given, set the callback to be the second parameter
             if( opts instanceof Function) {
                 callback = opts;
                 opts = {};
             }
+            
+            // Copy the given doc and set its _deleted field to true
             var newDoc = JSON.parse(JSON.stringify(doc));
             newDoc._deleted = true;
+            
+            // Do a bulk update where the list of documents only contains the
+            // delete'd copy of doc
             return api.bulkDocs({
                 docs : [newDoc]
             }, opts, yankError(callback));
