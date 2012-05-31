@@ -5374,6 +5374,8 @@
         };
 
 
+        // Update/create multiple documents given by req in the database
+        // given by host.
         api.bulkDocs = function(req, opts, callback) {
             // If no options were given, set the callback to be the second parameter
             if( opts instanceof Function) {
@@ -5381,9 +5383,16 @@
                 opts = {};
             }
             
+            // If opts.new_edits exists add it to the document data to be
+            // send to the database.
+            // If new_edits=true then it prevents the database from creating
+            // new revision numbers for the documents. Instead it just uses
+            // the old ones. This is used in database replication.
             if( typeof opts.new_edits !== 'undefined') {
                 req.new_edits = opts.new_edits;
             }
+            
+            // Update/create the documents
             ajax({
                 auth : host.auth,
                 type : 'POST',
