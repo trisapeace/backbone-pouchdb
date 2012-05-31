@@ -5177,6 +5177,9 @@
         };
 
 
+        // Get the document with the given id from the database given by host.
+        // The id could be solely the _id in the database, or it may be a _design/ID
+        // or _local/ID path.
         api.get = function(id, opts, callback) {
             // If no options were given, set the callback to be the second parameter
             if( opts instanceof Function) {
@@ -5187,19 +5190,37 @@
             // List of parameters to add to the GET request
             var params = [];
             
-            
+            // If it exists, add the opts.revs value to the list of parameters.
+            // If revs=true then the resulting JSON will include a field
+            // _revisions containing an array of the revision IDs.
             if(opts.revs) {
                 params.push('revs=true');
             }
+            
+            // If it exists, add the opts.revs_info value to the list of parameters.
+            // If revs_info=true then the resulting JSON will include the field
+            // _revs_info containing an array of objects in which each object 
+            // representing an available revision.
             if(opts.revs_info) {
                 params.push('revs_info=true');
             }
+            
+            // If it exists, add the opts.attachments value to the list of parameters.
+            // If attachments=true the resulting JSON will include the base64-encoded
+            // contents in the "data" property of each attachment.
             if(opts.attachments) {
                 params.push('attachments=true');
             }
+            
+            // If it exists, add the opts.rev value to the list of parameters.
+            // If rev is given a revision number then get the specified revision.
             if(opts.rev) {
                 params.push('rev=' + opts.rev);
             }
+            
+            // If it exists, add the opts.conflicts value to the list of parameters.
+            // If conflicts=true then the resulting JSON will include the field
+            // _conflicts containing all the conflicting revisions.
             if(opts.conflicts) {
                 params.push('conflicts=' + opts.conflicts);
             }
@@ -5208,21 +5229,34 @@
             params = params.join('&');
             params = params === '' ? '' : '?' + params;
 
+            // Set the options for the ajax call
             var options = {
                 auth : host.auth,
                 type : 'GET',
                 url : genUrl(host, id + params)
             };
 
+            // If the given id contains at least one '/' and the part before the '/'
+            // is NOT "_design" and is NOT "_local"
+            // OR 
+            // If the given id contains at least two '/' and the part before the first
+            // '/' is "_design".
+            // TODO This second condition seems strange since if parts[0] === '_design' then
+            // we already know that parts[0] !== '_local'.
             var parts = id.split('/');
             if((parts.length > 1 && parts[0] !== '_design' && parts[0] !== '_local') || (parts.length > 2 && parts[0] === '_design' && parts[0] !== '_local')) {
+                // Nothing is expected back from the server
                 options.dataType = false;
             }
 
+            // Get the document
             ajax(options, function(err, doc, xhr) {
+                // If the document does not exist, send an error to the callback
                 if(err) {
                     return call(callback, Pouch.Errors.MISSING_DOC);
                 }
+                
+                // Send the document to the callback
                 call(callback, null, doc, xhr);
             });
         };
@@ -5266,9 +5300,9 @@
         };
 
 
-        // Add the attachment given by doc with the given id, the revision given 
-        // by rev, and the content type given by type to the database given by 
-        // host.
+        // Add the attachment given by doc and the content type given by type
+        // to the document with the given id, the revision given by rev, and
+        // add it to the database given by host.
         api.putAttachment = function(id, rev, doc, type, callback) {
             // Add the attachment
             ajax({
