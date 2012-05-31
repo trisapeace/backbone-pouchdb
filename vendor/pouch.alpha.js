@@ -5203,6 +5203,8 @@
             if(opts.conflicts) {
                 params.push('conflicts=' + opts.conflicts);
             }
+            
+            // Format the list of parameters into a valid URI query string
             params = params.join('&');
             params = params === '' ? '' : '?' + params;
 
@@ -5264,10 +5266,11 @@
         };
 
 
-        // PUT the attachment given by doc with the given id, the revision given 
-        // by rev, and the content type given by type into the database given by 
+        // Add the attachment given by doc with the given id, the revision given 
+        // by rev, and the content type given by type to the database given by 
         // host.
         api.putAttachment = function(id, rev, doc, type, callback) {
+            // Add the attachment
             ajax({
                 auth : host.auth,
                 type : 'PUT',
@@ -5280,6 +5283,8 @@
         };
 
 
+        // Add the document given by doc (in JSON string format) to the database
+        // given by host. 
         api.put = function(doc, opts, callback) {
             // If no options were given, set the callback to be the second parameter
             if( opts instanceof Function) {
@@ -5287,16 +5292,23 @@
                 opts = {};
             }
 
+            // List of parameters to add to the PUT request
             var params = [];
+            
+            // If it exists, add the opts.new_edits value to the list of parameters.
+            // If new_edits = false then the database will NOT assign this document a
+            // new revision number
             if(opts && typeof opts.new_edits !== 'undefined') {
                 params.push('new_edits=' + opts.new_edits);
             }
 
+            // Format the list of parameters into a valid URI query string
             params = params.join('&');
             if(params !== '') {
                 params = '?' + params;
             }
 
+            // Add the document
             ajax({
                 auth : host.auth,
                 type : 'PUT',
@@ -5362,6 +5374,7 @@
                 params.push('endkey=' + encodeURIComponent(JSON.stringify(opts.endkey)));
             }
 
+            // Format the list of parameters into a valid URI query string
             params = params.join('&');
             if(params !== '') {
                 params = '?' + params;
