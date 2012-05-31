@@ -5037,13 +5037,31 @@
 
 
 
+    // Generate a URL with the host data given by opts and the given path.
     function genUrl(opts, path) {
+        // If the host is remote
         if(opts.remote) {
+            // If the host already has a path, then we need to have a path delimiter.
+            // Otherwise, the path delimiter is the emtpy string
             var pathDel = !opts.path ? '' : '/';
+            
+            // Return the URL made up of all the host's information and the given path
             return opts.protocol + '://' + opts.host + ':' + opts.port + '/' + opts.path + pathDel + opts.db + '/' + path;
         }
+        
+        // If the host is not remote, then teturn the URL made up of just the database name
+        // and the given path
         return '/' + opts.db + '/' + path;
     };
+
+
+
+
+
+
+
+
+
 
     function ajax(options, callback) {
         var defaults = {
