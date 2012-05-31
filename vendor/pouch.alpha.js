@@ -5496,6 +5496,9 @@
         };
 
 
+        // Given a set of document/revision IDs (given by req), tets the subset of 
+        // those that do NOT correspond to revisions stored in the database.
+        // See http://wiki.apache.org/couchdb/HttpPostRevsDiff
         api.revsDiff = function(req, opts, callback) {
             // If no options were given, set the callback to be the second parameter
             if( opts instanceof Function) {
@@ -5503,6 +5506,7 @@
                 opts = {};
             }
             
+            // Get the missing document/revision IDs
             ajax({
                 auth : host.auth,
                 type : 'POST',
