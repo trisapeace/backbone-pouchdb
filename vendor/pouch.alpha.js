@@ -5470,6 +5470,8 @@
 
 
         // Get a list of changes made to documents in the database given by host.
+        // TODO According to the README, there should be two other methods here,
+        // api.changes.addListener and api.changes.removeListener.
         api.changes = function(opts, callback) {
             // If no options were given, set the callback to be the second parameter
             if( opts instanceof Function) {
@@ -5718,26 +5720,34 @@
     var IdbPouch = function(opts, callback) {
 
         // IndexedDB requires a versioned database structure, this is going to make
-        // it hard to dynamically create object stores if we needed to for things
+        // it hard to dynamically create object stores if we need to for things
         // like views
         var POUCH_VERSION = 1;
 
-        // The object stores created for each database
-        // DOC_STORE stores the document meta data, its revision history and state
+        // The object stores created for each database.
+        // DOC_STORE stores the document meta data, its revision history and state.
         var DOC_STORE = 'document-store';
+        
         // BY_SEQ_STORE stores a particular version of a document, keyed by its
-        // sequence id
+        // sequence id.
         var BY_SEQ_STORE = 'by-sequence';
+        
         // Where we store attachments
         var ATTACH_STORE = 'attach-store';
 
         var api = {};
 
+        // Open the IndexedDB database whose name is given by opts.name
         var req = indexedDB.open(opts.name, POUCH_VERSION);
+        
+        // Store the name of the database
         var name = opts.name;
+        
+        // Start the update sequence at zero
         var update_seq = 0;
 
         var idb;
+
 
         req.onupgradeneeded = function(e) {
             var db = e.target.result;
@@ -5753,6 +5763,7 @@
                 keyPath : 'digest'
             });
         };
+
 
         req.onsuccess = function(e) {
 
@@ -5775,12 +5786,14 @@
             call(callback, null, api);
         };
 
+
         req.onerror = function(e) {
             call(callback, {
                 error : 'open',
                 reason : e.toString()
             });
         };
+
 
         api.destroy = function(name, callback) {
 
@@ -5798,9 +5811,11 @@
             };
         };
 
+
         api.valid = function() {
             return true;
         };
+
 
         // Each database needs a unique id so that we can store the sequence
         // checkpoint without having other databases confuse itself, since
@@ -5815,8 +5830,10 @@
             return id;
         };
 
+
         api.init = function(opts, callback) {
         };
+
 
         api.bulkDocs = function(req, opts, callback) {
 
@@ -6066,6 +6083,7 @@
             };
         };
 
+
         // First we look up the metadata in the ids database, then we fetch the
         // current revision(s) from the by sequence store
         api.get = function(id, opts, callback) {
@@ -6136,6 +6154,7 @@
             };
         };
 
+
         api.put = api.post = function(doc, opts, callback) {
             if( opts instanceof Function) {
                 callback = opts;
@@ -6145,6 +6164,7 @@
                 docs : [doc]
             }, opts, yankError(callback));
         };
+
 
         api.remove = function(doc, opts, callback) {
             if( opts instanceof Function) {
@@ -6157,6 +6177,7 @@
                 docs : [newDoc]
             }, opts, yankError(callback));
         };
+
 
         api.allDocs = function(opts, callback) {
             if( opts instanceof Function) {
@@ -6218,6 +6239,7 @@
             }
         };
 
+
         // Looping through all the documents in the database is a terrible idea
         // easiest to implement though, should probably keep a counter
         api.info = function(callback) {
@@ -6238,6 +6260,7 @@
             };
         };
 
+
         api.putAttachment = function(id, rev, doc, type, callback) {
             var docId = id.split('/')[0];
             var attachId = id.split('/')[1];
@@ -6249,6 +6272,7 @@
                 api.put(obj, callback);
             });
         };
+
 
         api.revsDiff = function(req, opts, callback) {
             if( opts instanceof Function) {
@@ -6287,6 +6311,7 @@
                 });
             });
         };
+
 
         api.changes = function(opts, callback) {
 
@@ -6398,7 +6423,9 @@
             }
         };
 
+
         api.changes.listeners = {};
+
 
         api.changes.emit = function() {
             var a = arguments;
@@ -6410,6 +6437,7 @@
                 opts.onChange.apply(opts.onChange, a);
             }
         };
+
 
         api.changes.addListener = function(id, opts, callback) {
             api.changes.listeners[id] = opts;
