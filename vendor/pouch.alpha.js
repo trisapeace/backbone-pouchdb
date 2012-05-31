@@ -5824,6 +5824,8 @@
         };
 
 
+        // TODO Why is this necessary. It's exactly the same as IdbPouch.destroy
+        // defined later in this file. Which definition style is better?
         api.destroy = function(name, callback) {
 
             var req = indexedDB.deleteDatabase(name);
@@ -6652,6 +6654,12 @@
             });
         };
     };
+
+
+
+
+
+
 
     // Set IdbPouch to be the adapter used with the idb scheme.
     Pouch.adapter('idb', IdbPouch);
