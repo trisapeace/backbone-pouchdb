@@ -4140,82 +4140,157 @@
     
     
     (function() {
-
+        // Compare the two given objects and determine which order they belong.
+        // Returns 0 if they are equal.
+        // Returns <0 if a is before b.
+        // Returns >0 if b is before a.
         Pouch.collate = function(a, b) {
+            // Determine a and b's indexes based on their types
             var ai = collationIndex(a);
             var bi = collationIndex(b);
+            
+            // If a and b are different types, then their collationIndex is used
             if((ai - bi) !== 0) {
                 return ai - bi;
             }
+            
+            // If a and b are both null, then they are equal
             if(a === null) {
                 return 0;
             }
+            
+            // If a and b are numbers, then the lower number comes first
             if( typeof a === 'number') {
                 return a - b;
             }
+            
+            // If a and b are booleans, then true comes before false
             if( typeof a === 'boolean') {
                 return a < b ? -1 : 1;
             }
+            
+            // If a and b are strings, stringCollate them
             if( typeof a === 'string') {
                 return stringCollate(a, b);
             }
+            
+            // If a and b are arrays, arrayCollate them
             if(Array.isArray(a)) {
                 return arrayCollate(a, b)
             }
+            
+            // If a and b are objects, objectColate them
             if( typeof a === 'object') {
                 return objectCollate(a, b);
             }
         }
+        
+        // Compare the two given strings.
         var stringCollate = function(a, b) {
             // See: https://github.com/daleharvey/pouchdb/issues/40
             // This is incompatible with the CouchDB implementation, but its the
             // best we can do for now
             return (a === b) ? 0 : ((a > b) ? 1 : -1);
         }
+        
+        // Compare the two given objects by each key/value pair then by number of keys.
+        //
+        // TODO This implementation seems weird to me because it doesn't take into
+        // consideration that two objects may have the same keys but in a different
+        // order.
         var objectCollate = function(a, b) {
-            var ak = Object.keys(a), bk = Object.keys(b);
+            // Get all of a's keys
+            var ak = Object.keys(a);
+            
+            // Get all of b's keys
+            var bk = Object.keys(b);
+            
+            // Get the minimum number of keys in a and b
             var len = Math.min(ak.length, bk.length);
+            
             for(var i = 0; i < len; i++) {
-                // First sort the keys
+                // Compare the two keys
                 var sort = Pouch.collate(ak[i], bk[i]);
                 if(sort !== 0) {
+                    // If the two keys are different, return their collation
                     return sort;
                 }
-                // if the keys are equal sort the values
+                
+                // Compare the two values
                 sort = Pouch.collate(a[ak[i]], b[bk[i]]);
                 if(sort !== 0) {
+                    // If the values are different, return their collation
                     return sort;
                 }
 
             }
+            
+            // If all of the matching keys also have matching values, then 
+            // Return 0 if a and b have the same number of keys. 
+            // Return 1 if a has more keys than b.
+            // Returns -1 if a has less keys than b.
             return (ak.length === bk.length) ? 0 : (ak.length > bk.length) ? 1 : -1;
         }
+        
+        // Compare the two given arrays, by values then by length.
         var arrayCollate = function(a, b) {
+            // Get the minimum length of a and b
             var len = Math.min(a.length, b.length);
+            
             for(var i = 0; i < len; i++) {
+                // Compare the two values
                 var sort = Pouch.collate(a[i], b[i]);
                 if(sort !== 0) {
+                    // If the two values are different, return their collation
                     return sort;
                 }
             }
+            // If all the values were the same, then
+            // Return 0 if a and b have the same length.
+            // Return 1 if a is longer than b.
+            // Return -1 if a is shorter than b.
             return (a.length === b.length) ? 0 : (a.length > b.length) ? 1 : -1;
         }
+        
         // The collation is defined by erlangs ordered terms
         // the atoms null, true, false come first, then numbers, strings,
         // arrays, then objects
         var collationIndex = function(x) {
+            // The order that the types go in
             var id = ['boolean', 'number', 'string', 'object'];
+            
+            // If x is a type in id
             if(id.indexOf( typeof x) !== -1) {
                 if(x === null) {
+                    // null is first, so it returns 1
                     return 1;
                 }
+                
+                // non-null types return 2 more than their index in the id array
+                // (i.e. booleans return 2, numbers return 3, strings return 4,
+                // and objects return 5.
                 return id.indexOf( typeof x) + 2;
             }
+            
+            // arrays should be after strings but before objects, so they return 4.5
             if(Array.isArray(x)) {
                 return 4.5;
             }
+            
+            // TODO What happens if x is not null, boolean, number, string, object, or array?
+            // Is this possible?
         }
     }).call(this);
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
     (function() {
 
         // for a better overview of what this is doing, read:
