@@ -5133,7 +5133,7 @@
             type : 'PUT',
             url : db_url
         }, function(err, ret) {
-            // If we get an error and the error's status is "Unauthorized"
+            // If we get an "Unauthorized" error
             if(err && err.status === 401) {
                 // Test if the database already exists
                 ajax({
@@ -5165,6 +5165,9 @@
         };
 
 
+        // Calls GET on the host, which gets back a JSON string containing
+        //     couchdb: A welcome string
+        //     version: The version of CouchDB it is running
         api.info = function(callback) {
             ajax({
                 auth : host.auth,
