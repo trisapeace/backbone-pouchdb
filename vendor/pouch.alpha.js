@@ -5428,6 +5428,7 @@
         };
 
 
+        // Get a list of changes made to documents in the database given by host.
         api.changes = function(opts, callback) {
             // If no options were given, set the callback to be the second parameter
             if( opts instanceof Function) {
@@ -5436,57 +5437,102 @@
                 };
             }
             
+            // If a callback was provided outside of opts, then it is the one that
+            // will be called upon completion
             if(callback) {
                 opts.complete = callback;
             }
 
+            // Query string of all the parameters to add to the GET request
             var params = '?style=all_docs'
+            
+            // If opts.include_docs exists, opts.filter exists, and opts.filter is a
+            // function, add the include_docs value to the query string.
+            // If include_docs=true then include the associated document with each
+            // result.
             if(opts.include_docs || opts.filter && typeof opts.filter === 'function') {
                 params += '&include_docs=true'
             }
+            
+            // If opts.continuous exists, add the feed value to the query string.
+            // If feed=longpoll then it waits for either a timeout or a change to 
+            // occur before returning.
             if(opts.continuous) {
                 params += '&feed=longpoll';
             }
+            
+            // If opts.conflicts exists, add the conflicts value to the query string.
+            // TODO I can't find documentation of what conflicts=true does. See
+            // http://wiki.apache.org/couchdb/HTTP_database_API#Changes
             if(opts.conflicts) {
                 params += '&conflicts=true';
             }
+            
+            // If opts.descending exists, add the descending value to the query string.
+            // if descending=true then the change results are returned in 
+            // descending order (most recent change first).
             if(opts.descending) {
                 params += '&descending=true';
             }
+            
+            // If opts.filter exists and is a string then add the filter value
+            // to the query string.
+            // If filter is given a string containing the name of a filter in
+            // the design, then only documents passing through the filter will
+            // be returned.
             if(opts.filter && typeof opts.filter === 'string') {
                 params += '&filter=' + opts.filter;
             }
 
             var xhr;
 
+            // Get all the changes starting wtih the one immediately after the
+            // sequence number given by since. 
             var fetch = function(since, callback) {
+                // Set the options for the ajax call
                 var opts = {
                     auth : host.auth,
                     type : 'GET',
                     url : genUrl(host, '_changes' + params + '&since=' + since)
                 };
+                
+                // Get the changes
                 xhr = ajax(opts, function(err, res) {
                     callback(res);
                 });
             }
+            
+            // If opts.since exists, get all the changes from the sequence
+            // number given by opts.since. Otherwise, get all the changes
+            // from the sequence number 0.
             fetch(opts.since || 0, function fetch_cb(res) {
+                // If the result of the ajax call (res) contains changes
+                // (res.results)
                 if(res && res.results) {
+                    // For each change
                     res.results.forEach(function(c) {
+                        // Discard any changes that don't match the filter, if there is one
                         if(opts.filter && typeof opts.filter === 'function' && !opts.filter.apply(this, [c.doc])) {
                             return;
                         }
+                        
                         if(!opts.aborted) {
+                            // Process the change
                             call(opts.onChange, c);
                         }
                     });
                 }
+                
                 if(res && opts.continuous) {
+                    // Call fetch again with the newest sequence number
                     fetch(res.last_seq, fetch_cb);
                 } else {
+                    // We're done, call the callback
                     call(opts.complete, null, res);
                 }
             });
 
+            // Return a method to cancel this method from processing any more
             return {
                 cancel : function() {
                     opts.aborted = true;
