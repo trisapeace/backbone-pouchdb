@@ -4444,6 +4444,17 @@
         };
 
     }).call(this);
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
     (function() {
 
         function replicate(src, target, opts, callback, replicateRet) {
@@ -4556,6 +4567,15 @@
         };
 
     }).call(this);
+    
+    
+    
+    
+    
+    
+    
+    
+    
     // Pretty dumb name for a function, just wraps callback calls so we dont
     // to if (callback) callback() everywhere
     var call = function(fun) {
@@ -4564,6 +4584,15 @@
             fun.apply(this, args);
         }
     }
+    
+    
+    
+    
+    
+    
+    
+    
+    
     // Preprocess documents, parse their revisions, assign an id and a
     // revision for new writes that are missing them, etc
     var parseDoc = function(doc, newEdits) {
@@ -4638,6 +4667,16 @@
             data : {}
         });
     };
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
 
     var compareRevs = function(a, b) {
         // Sort by id
@@ -4656,6 +4695,15 @@
         return (a.rev_tree[0].start < b.rev_tree[0].start ? -1 : 1);
     };
 
+
+
+
+
+
+
+
+
+
     // Pretty much all below can be combined into a higher order function to
     // traverse revisions
     // Turn a tree into a list of rootToLeaf paths
@@ -4668,11 +4716,25 @@
             expandTree(all, i + 1, child);
         });
     }
+    
+    
+    
+    
+    
+    
+    
     var collectRevs = function(path) {
         var revs = [];
         expandTree(revs, path.pos, path.ids);
         return revs;
     }
+    
+    
+    
+    
+    
+    
+    
     var collectLeavesInner = function(all, pos, tree) {
         if(!tree[1].length) {
             all.push({
@@ -4683,6 +4745,12 @@
             collectLeavesInner(all, pos + 1, child);
         });
     }
+    
+    
+    
+    
+    
+    
     var collectLeaves = function(revs) {
         var leaves = [];
         revs.forEach(function(tree) {
@@ -4690,6 +4758,13 @@
         });
         return leaves;
     }
+    
+    
+    
+    
+    
+    
+    
     var collectConflicts = function(revs) {
         var leaves = collectLeaves(revs);
         // First is current rev
@@ -4698,6 +4773,13 @@
             return x.rev;
         });
     }
+    
+    
+    
+    
+    
+    
+    
     var fetchCheckpoint = function(src, target, callback) {
         var id = Crypto.MD5(src.id() + target.id());
         src.get('_local/' + id, function(err, doc) {
@@ -4708,6 +4790,14 @@
             }
         });
     };
+    
+    
+    
+    
+    
+    
+    
+    
 
     var writeCheckpoint = function(src, target, checkpoint, callback) {
         var check = {
@@ -4723,6 +4813,14 @@
             });
         });
     };
+    
+    
+    
+    
+    
+    
+    
+    
 
     // Turn a tree into a list of rootToLeaf paths
     function expandTree2(all, current, pos, arr) {
@@ -4738,6 +4836,15 @@
             expandTree2(all, current, pos, child);
         });
     }
+    
+    
+    
+    
+    
+    
+    
+    
+    
 
     function rootToLeaf(tree) {
         var all = [];
@@ -4746,6 +4853,15 @@
         });
         return all;
     }
+    
+    
+    
+    
+    
+    
+    
+    
+    
 
     var arrayFirst = function(arr, callback) {
         for(var i = 0; i < arr.length; i++) {
@@ -4755,31 +4871,75 @@
         }
         return false;
     };
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
 
     // Basic wrapper for localStorage
     var localJSON = (function() {
+        // If there's no localStorage then return false
         if(!localStorage) {
             return false;
         }
+        
         return {
+            // localJSON.set(prop, val) stores the given JSON string representation of
+            // val in local storage with the key given by prop.
             set : function(prop, val) {
                 localStorage.setItem(prop, JSON.stringify(val));
             },
+            
+            // localJSON.get(prop, def) gets the reconsructed Javascript object from
+            // the localStorage item with the key given by prop, if there is one.
+            // Otherwise, returns the default given by def.
+            //
+            // TODO Why are we returning "false" when the reconstruction fails. I think
+            // it would make more sense to return the default given by def.
             get : function(prop, def) {
                 try {
                     if(localStorage.getItem(prop) === null) {
+                        // If there is no item in localStorage with the key given by prop,
+                        // then return the default given by def
                         return def;
                     }
+                    
+                    // Return the reconstructed Javascript object that was in localStorage
+                    // with the key given by prop
+                    // If reconstruction was unsuccessful, return "false"
                     return JSON.parse((localStorage.getItem(prop) || 'false'));
                 } catch(err) {
+                    // If there were any errors, return the default given by def
                     return def;
                 }
             },
+            
+            // localJSON.remove(prop) removes the item from localStorage that has
+            // the key given by prop.
             remove : function(prop) {
                 localStorage.removeItem(prop);
             }
         };
     })();
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
     // parseUri 1.2.2
     // (c) Steven Levithan <stevenlevithan.com>
     // MIT License
