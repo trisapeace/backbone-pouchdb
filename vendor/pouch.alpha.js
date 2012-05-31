@@ -5746,6 +5746,7 @@
         // Start the update sequence at zero
         var update_seq = 0;
 
+        // The open database
         var idb;
 
 
@@ -5843,6 +5844,8 @@
         };
 
 
+        // TODO Why is this necessary. It's exactly the same as IdbPouch.valid
+        // defined later in this file. Which defintiion style is better?
         api.valid = function() {
             return true;
         };
