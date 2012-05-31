@@ -5749,16 +5749,29 @@
         var idb;
 
 
+        // The "onupgradeneeded" event handler for the database creation.
+        // Creates all the needed object stores.
         req.onupgradeneeded = function(e) {
+            // Get the database from the event
             var db = e.target.result;
+            
+            // Create a new object store for documents metadata in the  
+            // database whose key path is 'id' and that has an index on 
+            // 'seq'
             db.createObjectStore(DOC_STORE, {
                 keyPath : 'id'
             }).createIndex('seq', 'seq', {
                 unique : true
             });
+            
+            // Create a new object store for documents that does not have
+            // a key generator
             db.createObjectStore(BY_SEQ_STORE, {
                 autoIncrement : true
             });
+            
+            // Create a new object store for attachments whose key path is
+            // 'digest'
             db.createObjectStore(ATTACH_STORE, {
                 keyPath : 'digest'
             });
