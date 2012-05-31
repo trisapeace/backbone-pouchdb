@@ -5393,6 +5393,8 @@
         };
 
 
+        // Get a listing of the documents in the database given
+        // by host and ordered by increasing id.
         api.allDocs = function(opts, callback) {
             // If no options were given, set the callback to be the second parameter
             if( opts instanceof Function) {
@@ -5400,16 +5402,34 @@
                 opts = {};
             }
             
+            // List of parameters to add to the GET request
             var params = [];
+            
+            // TODO I don't see conflicts as a valid parameter for a
+            // _all_docs request (see http://wiki.apache.org/couchdb/HTTP_Document_API#all_docs)
             if(opts.conflicts) {
                 params.push('conflicts=true');
             }
+            
+            // If opts.include_docs exists, add the include_docs value to the
+            // list of parameters.
+            // If include_docs=true then include the associated document with each
+            // result.
             if(opts.include_docs) {
                 params.push('include_docs=true');
             }
+            
+            // If opts.startkey exists, add the startkey value to the list of
+            // parameters.
+            // If startkey is given then the returned list of documents will
+            // start with the document whose id is startkey.
             if(opts.startkey) {
                 params.push('startkey=' + encodeURIComponent(JSON.stringify(opts.startkey)));
             }
+            
+            // If opts.endkey exists, add the endkey value to the list of parameters.
+            // If endkey is given then the returned list of docuemnts will
+            // end with the document whose id is endkey.
             if(opts.endkey) {
                 params.push('endkey=' + encodeURIComponent(JSON.stringify(opts.endkey)));
             }
@@ -5420,6 +5440,7 @@
                 params = '?' + params;
             }
 
+            // Get the document listing
             ajax({
                 auth : host.auth,
                 type : 'GET',
