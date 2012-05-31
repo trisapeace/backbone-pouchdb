@@ -5865,6 +5865,8 @@
         };
 
 
+        // TODO Why is this here? There's nothing in it, it's never used, and
+        // there is no corresponding init function in HttpPouch?
         api.init = function(opts, callback) {
         };
 
