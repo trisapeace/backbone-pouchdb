@@ -5184,7 +5184,10 @@
                 opts = {};
             }
             
+            // List of parameters to add to the GET request
             var params = [];
+            
+            
             if(opts.revs) {
                 params.push('revs=true');
             }
@@ -5261,6 +5264,9 @@
         };
 
 
+        // PUT the attachment given by doc with the given id, the revision given 
+        // by rev, and the content type given by type into the database given by 
+        // host.
         api.putAttachment = function(id, rev, doc, type, callback) {
             ajax({
                 auth : host.auth,
