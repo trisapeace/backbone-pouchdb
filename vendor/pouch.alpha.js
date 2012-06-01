@@ -5950,7 +5950,7 @@
                 });
             });
 
-            var txn = idb.transaction([DOC_STORE, BY_SEQ_STORE, ATTACH_STORE], IDBTransaction.READ_WRITE);
+            var txn = idb.transaction([DOC_STORE, BY_SEQ_STORE, ATTACH_STORE], "readwrite");
 
             txn.oncomplete = function(event) {
 
@@ -6133,7 +6133,7 @@
                 opts = {};
             }
 
-            var txn = idb.transaction([DOC_STORE, BY_SEQ_STORE, ATTACH_STORE], IDBTransaction.READ);
+            var txn = idb.transaction([DOC_STORE, BY_SEQ_STORE, ATTACH_STORE], "readonly");
 
             if(/\//.test(id) && !/^_local/.test(id) && !/^_design/.test(id)) {
                 var docId = id.split('/')[0];
@@ -6245,7 +6245,7 @@
             descending = descending ? IDBCursor.PREV : null;
 
             var keyRange = start && end ? IDBKeyRange.bound(start, end, false, false) : start ? IDBKeyRange.lowerBound(start, true) : end ? IDBKeyRange.upperBound(end) : false;
-            var transaction = idb.transaction([DOC_STORE, BY_SEQ_STORE], IDBTransaction.READ);
+            var transaction = idb.transaction([DOC_STORE, BY_SEQ_STORE], "readonly");
             var oStore = transaction.objectStore(DOC_STORE);
             var oCursor = keyRange ? oStore.openCursor(keyRange, descending) : oStore.openCursor(null, descending);
             var results = [];
@@ -6297,7 +6297,7 @@
         // easiest to implement though, should probably keep a counter
         api.info = function(callback) {
             var count = 0;
-            idb.transaction([DOC_STORE], IDBTransaction.READ).objectStore(DOC_STORE).openCursor().onsuccess = function(e) {
+            idb.transaction([DOC_STORE], "readonly").objectStore(DOC_STORE).openCursor().onsuccess = function(e) {
                 var cursor = e.target.result;
                 if(!cursor) {
                     return callback(null, {
@@ -6568,7 +6568,7 @@
 
         var viewQuery = function(fun, idb, options) {
 
-            var txn = idb.transaction([DOC_STORE, BY_SEQ_STORE], IDBTransaction.READ);
+            var txn = idb.transaction([DOC_STORE, BY_SEQ_STORE], "readonly");
             var objectStore = txn.objectStore(DOC_STORE);
             var request = objectStore.openCursor();
             var mapContext = {};
