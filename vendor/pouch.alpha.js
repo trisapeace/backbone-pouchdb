@@ -4082,6 +4082,7 @@
 
 
 
+    // Destroys the database given by name.
     Pouch.destroy = function(name, callback) {
         // Call the destroy method on the correct adapter based on the given name
         var opts = Pouch.parseAdapter(name);
