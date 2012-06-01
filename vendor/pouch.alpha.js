@@ -6245,9 +6245,10 @@
             descending = descending ? "prev" : null;
 
             var keyRange = start && end ? IDBKeyRange.bound(start, end, false, false) : start ? IDBKeyRange.lowerBound(start, true) : end ? IDBKeyRange.upperBound(end) : false;
+            keyRange = keyRange || null;
             var transaction = idb.transaction([DOC_STORE, BY_SEQ_STORE], "readonly");
             var oStore = transaction.objectStore(DOC_STORE);
-            var oCursor = keyRange ? oStore.openCursor(keyRange, descending) : oStore.openCursor(null, descending);
+            var oCursor = descending ? oStore.openCursor(keyRange, descending) : oStore.openCursor(keyRange);
             var results = [];
             oCursor.onsuccess = function(e) {
                 if(!e.target.result) {
@@ -6393,13 +6394,15 @@
                     var filter = eval('(function() { return ' + ddoc.filters[filterName[1]] + ' })()');
                     opts.filter = filter;
                     txn = idb.transaction([DOC_STORE, BY_SEQ_STORE]);
-                    var req = txn.objectStore(BY_SEQ_STORE).openCursor(IDBKeyRange.lowerBound(opts.seq), descending);
+                    var req = descending ? txn.objectStore(BY_SEQ_STORE).openCursor(IDBKeyRange.lowerBound(opts.seq), descending)
+                                         : txn.objectStore(BY_SEQ_STORE).openCursor(IDBKeyRange.lowerBound(opts.seq))
                     req.onsuccess = onsuccess;
                     req.onerror = onerror;
                 });
             } else {
                 txn = idb.transaction([DOC_STORE, BY_SEQ_STORE]);
-                var req = txn.objectStore(BY_SEQ_STORE).openCursor(IDBKeyRange.lowerBound(opts.seq), descending);
+                var req = descending ? txn.objectStore(BY_SEQ_STORE).openCursor(IDBKeyRange.lowerBound(opts.seq), descending)
+                                     : txn.objectStore(BY_SEQ_STORE).openCursor(IDBKeyRange.lowerBound(opts.seq));
                 req.onsuccess = onsuccess;
                 req.onerror = onerror;
             }
