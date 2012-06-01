@@ -4001,15 +4001,18 @@
             return new Pouch(name, opts, callback);
         }
 
+        // If no options were given, set the callback to be the second parameter
         if( opts instanceof Function || typeof opts === 'undefined') {
             callback = opts;
             opts = {};
         }
 
+        // Store the name and adapter (aka scheme) for this Pouch
         var backend = Pouch.parseAdapter(opts.name || name);
         opts.name = backend.name;
         opts.adapter = opts.adapter || backend.adapter;
 
+        // Ensure adapter is valid
         if(!Pouch.adapters[backend.adapter] || !Pouch.adapters[backend.adapter].valid()) {
             throw 'Invalid Adapter';
         }
