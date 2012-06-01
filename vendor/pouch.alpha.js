@@ -5400,7 +5400,7 @@
             
             // If opts.new_edits exists add it to the document data to be
             // send to the database.
-            // If new_edits=true then it prevents the database from creating
+            // If new_edits=false then it prevents the database from creating
             // new revision numbers for the documents. Instead it just uses
             // the old ones. This is used in database replication.
             if( typeof opts.new_edits !== 'undefined') {
@@ -5876,23 +5876,28 @@
 
 
         api.bulkDocs = function(req, opts, callback) {
-
+            // If no options were given, set the callback to be the second parameter
             if( opts instanceof Function) {
                 callback = opts;
                 opts = {};
             }
 
+            // Error out if there are no documents to update
             if(!req.docs) {
                 return call(callback, Pouch.Errors.MISSING_BULK_DOCS);
             }
 
+            // If newEdits is set to false then it prevents the database from creating
+            // new revision numbers for the documents. Instead it just uses
+            // the old ones. This is used in database replication.
             var newEdits = 'new_edits' in opts ? opts.new_edits : true;
+            
+            // Get all the documents to update
             // We dont want to modify the users variables in place, JSON is kinda
             // nasty for a deep clone though
-
             var docs = JSON.parse(JSON.stringify(req.docs));
 
-            // Parse and sort the docs
+            // Parse the documents into useful objects
             var docInfos = docs.map(function(doc, i) {
                 var newDoc = parseDoc(doc, newEdits);
                 // We want to ensure the order of the processing and return of the docs,
@@ -5901,6 +5906,7 @@
                 return newDoc;
             });
 
+            // Sort the document objects by their id field
             docInfos.sort(function(a, b) {
                 if(a.error || b.error) {
                     return -1;
@@ -5913,58 +5919,96 @@
             var firstDoc;
             for(var i = 0; i < docInfos.length; i++) {
                 if(docInfos[i].error) {
+                    // Store any errors in the results array
                     results.push(docInfos[i])
                 } else {
+                    // Get the first non-error document object
                     firstDoc = docInfos[i];
                     break;
                 }
             }
 
+            // If all of the document objects had errors
             if(!firstDoc) {
+                // Sort the documents by their sequence number
                 docInfos.sort(function(a, b) {
                     return a._bulk_seq - b._bulk_seq;
                 });
+                
+                // Remove the sequence number from all of the documents
+                // in the results array (i.e. all the documents that had
+                // errors)
                 docInfos.forEach(function(result) {
                     delete result._bulk_seq;
                 });
+                
+                // Callback with all the document objects
                 return call(callback, null, docInfos);
             }
 
+            // Create a key range from the id of the first document to the id of the last
+            // document, inclusive
             var keyRange = IDBKeyRange.bound(firstDoc.metadata.id, docInfos[docInfos.length - 1].metadata.id, false, false);
 
-            // This groups edits to the same document together
+            // Group all the document objects into buckets according to their
+            // id. If two document objects have the same id then they are 
+            // two edits to the same document
             var buckets = docInfos.reduce(function(acc, docInfo) {
+                // If the docInfo document object has the same id as the first
+                // document object in the accumulator
                 if(docInfo.metadata.id === acc[0][0].metadata.id) {
+                    // Group this the docInfo document object with the first
+                    // document object in the accumulator
                     acc[0].push(docInfo);
                 } else {
+                    // Unshift the docInfo document object onto the front
+                    // of the accumulator to become its new first document object
                     acc.unshift([docInfo]);
                 }
+                
+                // The updated accumulator is the first parameter for the next
+                // reduce() call
                 return acc;
+            // The initial accumulator is an array containing a single array
+            // containing the first document object
             }, [[docInfos.shift()]]);
 
-            //The reduce screws up the array ordering
+            // The reduce reverse the array ordering, so put it back the way it was
             buckets.reverse();
+            
+            // For each document, sort its document objects based on their
+            // sequence number
             buckets.forEach(function(bucket) {
                 bucket.sort(function(a, b) {
                     return a._bulk_seq - b._bulk_seq;
                 });
             });
 
+            // Start a read/write transactions on the document metadata store and the
+            // sequential document store
             var txn = idb.transaction([DOC_STORE, BY_SEQ_STORE, ATTACH_STORE], "readwrite");
 
+            // Callback for when the transaction completes
             txn.oncomplete = function(event) {
-
+                // Array of results
                 var aresults = [];
 
+                // Sort the results by their sequence number
                 results.sort(function(a, b) {
                     return a._bulk_seq - b._bulk_seq;
                 });
 
+                // For each result
                 results.forEach(function(result) {
+                    // Remove its sequence number
                     delete result._bulk_seq;
+                    
                     if(result.error) {
+                        // Document objects with errors are added to the aresults array
                         aresults.push(result);
                     } else {
+                        // A success object containing just the id and the revision number
+                        // of the document object is added to the aresults array
                         aresults.push({
                             ok : true,
                             id : result.metadata.id,
@@ -5972,10 +6016,14 @@
                         });
                     }
 
+                    // Stop processing results with errors and results whose id contains
+                    // the string "_local"
                     if(result.error || /_local/.test(result.metadata.id)) {
                         return;
                     }
 
+                    // Form an object of information about this change for any listening
+                    // subscribers
                     var c = {
                         id : result.metadata.id,
                         seq : result.metadata.seq,
@@ -5983,12 +6031,18 @@
                         doc : result.data
                     };
 
+                    // Notify the pub/sub system that a change has occurred
                     api.changes.emit(c);
                 });
+                
+                // Return the results as either document objects (if there was an error) or
+                // as success objects
                 call(callback, null, aresults);
             };
 
+            // Callback for when an error happens during the transaction
             txn.onerror = function(event) {
+                // Return an error object to the callback
                 if(callback) {
                     var code = event.target.errorCode;
                     var message = Object.keys(IDBDatabaseException)[code - 1].toLowerCase();
@@ -5999,6 +6053,9 @@
                 }
             };
 
+            // TODO There is no ontimeout event on IDBTransactions. Instead, if a timeout
+            // occurs, a TimeoutError is thrown (see 
+            // http://www.w3.org/TR/IndexedDB/#transaction-creation-steps)
             txn.ontimeout = function(event) {
                 if(callback) {
                     var code = event.target.errorCode;
@@ -6061,6 +6118,7 @@
                 return err;
             };
 
+            // Create a cursor over all the document objects in this bulk update
             var cursReq = txn.objectStore(DOC_STORE).openCursor(keyRange, "next");
 
             var update = function(cursor, oldDoc, docInfo, callback) {
@@ -6099,8 +6157,12 @@
                 }
             };
 
+            // TODO Why are they all marked as conflicts once this is finished? I would think
+            // that conflicts would be the abnormal case
             cursReq.onsuccess = function(event) {
+                // Get the cursor of documents  to be updated
                 var cursor = event.target.result;
+                
                 if(cursor && buckets.length) {
                     var bucket = buckets.shift();
                     if(cursor.key === bucket[0].metadata.id) {
