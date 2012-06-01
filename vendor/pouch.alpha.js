@@ -6061,7 +6061,7 @@
                 return err;
             };
 
-            var cursReq = txn.objectStore(DOC_STORE).openCursor(keyRange, IDBCursor.NEXT);
+            var cursReq = txn.objectStore(DOC_STORE).openCursor(keyRange, "next");
 
             var update = function(cursor, oldDoc, docInfo, callback) {
                 var mergedRevisions = Pouch.merge(oldDoc.rev_tree, docInfo.metadata.rev_tree[0], 1000);
@@ -6242,7 +6242,7 @@
             var end = 'endkey' in opts ? opts.endkey : false;
 
             var descending = 'descending' in opts ? opts.descending : false;
-            descending = descending ? IDBCursor.PREV : null;
+            descending = descending ? "prev" : null;
 
             var keyRange = start && end ? IDBKeyRange.bound(start, end, false, false) : start ? IDBKeyRange.lowerBound(start, true) : end ? IDBKeyRange.upperBound(end) : false;
             var transaction = idb.transaction([DOC_STORE, BY_SEQ_STORE], "readonly");
@@ -6381,7 +6381,7 @@
             }
 
             var descending = 'descending' in opts ? opts.descending : false;
-            descending = descending ? IDBCursor.PREV : null;
+            descending = descending ? "prev" : null;
 
             var results = [];
             var id = Math.uuid();
