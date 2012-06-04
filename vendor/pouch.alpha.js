@@ -1373,15 +1373,12 @@ window.IDBDatabaseException = window.IDBDatabaseException ||
 // Newer webkits expect strings for transaction + cursor paramters
 // older webkit + older firefox require constants, we can drop
 // the constants when both stable releases use strings
-IDBTransaction = IDBTransaction || {
-  READ_WRITE: 'readwrite',
-  READ: 'readonly'
-};
-
-IDBCursor = IDBCursor || {
-  NEXT: 'next',
-  PREV: 'prev'
-};
+if (!IDBTransaction.READ) {
+  IDBTransaction.READ_WRITE = "readwrite";
+  IDBTransaction.READ = "readonly";
+  IDBCursor.NEXT = "next";
+  IDBCursor.PREV = "prev";
+}
 
 var idbError = function(callback) {
   return function(event) {
